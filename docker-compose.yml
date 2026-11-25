@@ -1,0 +1,32 @@
+services:
+  armazenamento:
+    build: ./app/armazenamento
+    networks:
+      - rede_teste
+
+  servico:
+    build: ./app/servico
+    environment:
+      - MODO=${MODO:-dividido}
+      - MITIGACAO=${MITIGACAO:-nao}
+      - MAX_SIMULTANEOS=${MAX_SIMULTANEOS:-4}
+    depends_on:
+      - armazenamento
+    networks:
+      - rede_teste
+
+  gerador:
+    build: ./carga
+    environment:
+      - TOTAL_ITENS=${TOTAL_ITENS:-1000}
+      - CONCORRENCIA=${CONCORRENCIA:-16}
+      - MITIGACAO=${MITIGACAO:-nao}
+      - TAMANHO_LOTE=${TAMANHO_LOTE:-16}
+    depends_on:
+      - servico
+    networks:
+      - rede_teste
+
+networks:
+  rede_teste:
+    driver: bridge
