@@ -1,0 +1,70 @@
+DATA_UTC=2026-11-25T18:33:56.517796+00:00
+CENARIO=antes RODADA=3 MODO=dividido MITIGACAO=nao TOTAL_ITENS=1500 CONCORRENCIA=64 TAMANHO_LOTE=16 MAX_SIMULTANEOS=16
+SISTEMA=Linux-7.0.0-44-generic-x86_64-with-glibc2.39
+SHA256 app/armazenamento/Dockerfile e5fd38677e97abd2443fec51a7cd2470c5ac905ac81e8ad9bca277e929635b27
+SHA256 app/servico/Dockerfile 386bf44483bef541aadcc5bcc6480c43ad82c138ef0105bd764a67e7f99bd005
+SHA256 docker-compose.yml 3eb200170e2b53343efcd964f7a4a5e3177a5bbbe434cddba286a94aa115eed1
+SHA256 app/armazenamento/Program.cs 078367a5f31e7641663c1cde5f4c5ecfb9a4a7166ee9376af291e01161df390f
+SHA256 app/servico/Program.cs 9c743ebcf57485f836e656fae1393804e69d4418f29efba1d709ab7439305e23
+SHA256 carga/Program.cs b97d7850a031745e50f239ab280970989cf92b82345aeb7db36f492181c7bd99
+$ docker version --format '{{.Server.Version}}'
+29.10.0
+
+CODIGO_SAIDA=0
+$ docker compose version --short
+5.6.1
+
+CODIGO_SAIDA=0
+$ docker compose up -d --force-recreate --wait armazenamento servico
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Recreate 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Recreated 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Recreate 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Recreated 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Starting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Started 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Waiting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Healthy 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Starting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Started 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Waiting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Waiting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Healthy 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Healthy 
+
+CODIGO_SAIDA=0
+$ docker compose images --format json
+[{"ID":"sha256:06a95256603a09c661a4ab6e001c224f8fd6179445f9c5065ad1c27486da7a94","ContainerName":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1","Repository":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento","Tag":"latest","Platform":"linux/amd64","Size":330637203,"Created":"2026-11-25T13:21:18.672035342-03:00","LastTagTime":"2026-11-25T18:31:33.845017249Z"},{"ID":"sha256:95666cd4a748ac2fde13a937dc39dd26f00cbb2d5356d0e3d63fd38ebce43d66","ContainerName":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1","Repository":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico","Tag":"latest","Platform":"linux/amd64","Size":330638020,"Created":"2026-11-25T14:00:07.497686847-03:00","LastTagTime":"2026-11-25T18:31:33.845683588Z"}]
+
+
+CODIGO_SAIDA=0
+$ docker compose exec -T armazenamento curl -sf http://localhost:8001/health
+"ok"
+CODIGO_SAIDA=0
+$ docker compose exec -T armazenamento curl -sf http://localhost:8001/health
+"ok"
+CODIGO_SAIDA=0
+$ docker compose exec -T servico curl -sf http://localhost:8000/health
+"ok"
+CODIGO_SAIDA=0
+$ docker compose exec -T servico curl -sf http://localhost:8000/health
+"ok"
+CODIGO_SAIDA=0
+$ docker compose exec -T armazenamento curl -sf http://localhost:8001/estatisticas
+{"gravacoes":0,"leituras":0,"transicoes":0}
+CODIGO_SAIDA=0
+VALIDACAO_HEALTHCHECK=APROVADA_CONTADORES_ZERO
+$ docker compose run --rm --no-deps -e MODO=dividido -e MITIGACAO=nao -e TOTAL_ITENS=1500 -e CONCORRENCIA=64 -e TAMANHO_LOTE=16 gerador
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-gerador-run-2892dcc6648a Creating 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-gerador-run-2892dcc6648a Created 
+CONFIGURACAO_SERVIDOR: MODO=dividido | MITIGACAO=nao | MAX_SIMULTANEOS=16
+=== RESULTADO DO TESTE ===
+TOTAL_ITENS=1500 | CONCORRENCIA=64 | MITIGACAO=nao
+MODO=dividido | TAMANHO_LOTE=16 | MAX_SIMULTANEOS=16
+TEMPO_TOTAL_S=0.5774
+SUCESSOS=1500 | FALHAS=0 | TAXA_ERRO_PCT=0.00%
+VAZAO_ITENS_S=2597.76
+LATENCIA_P95_MS=39.82
+GRAVACOES=1500 | LEITURAS=1500 | TRANSICOES=4500
+CUSTO_ESTIMADO_10K=0.8577
+
+CODIGO_SAIDA=0

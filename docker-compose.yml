@@ -3,6 +3,12 @@ services:
     build: ./app/armazenamento
     networks:
       - rede_teste
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8001/health"]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
 
   servico:
     build: ./app/servico
@@ -11,9 +17,16 @@ services:
       - MITIGACAO=${MITIGACAO:-nao}
       - MAX_SIMULTANEOS=${MAX_SIMULTANEOS:-4}
     depends_on:
-      - armazenamento
+      armazenamento:
+        condition: service_healthy
     networks:
       - rede_teste
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
 
   gerador:
     build: ./carga
@@ -23,7 +36,8 @@ services:
       - MITIGACAO=${MITIGACAO:-nao}
       - TAMANHO_LOTE=${TAMANHO_LOTE:-16}
     depends_on:
-      - servico
+      servico:
+        condition: service_healthy
     networks:
       - rede_teste
 

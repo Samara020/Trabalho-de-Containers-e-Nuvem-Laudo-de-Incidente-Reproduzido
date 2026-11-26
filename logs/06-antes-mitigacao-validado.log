@@ -1,0 +1,45 @@
+DATA_UTC=2026-11-25T17:01:25.815909+00:00
+CENARIO: MODO=dividido MITIGACAO=nao MAX_SIMULTANEOS=16 TOTAL_ITENS=1500 CONCORRENCIA=64 TAMANHO_LOTE=16
+SHA256 app/servico/Program.cs 9c743ebcf57485f836e656fae1393804e69d4418f29efba1d709ab7439305e23
+SHA256 app/armazenamento/Program.cs 078367a5f31e7641663c1cde5f4c5ecfb9a4a7166ee9376af291e01161df390f
+SHA256 carga/Program.cs b97d7850a031745e50f239ab280970989cf92b82345aeb7db36f492181c7bd99
+$ docker version --format '{{.Server.Version}}'
+29.10.0
+CODIGO_SAIDA=0
+$ docker compose version --short
+5.6.1
+CODIGO_SAIDA=0
+$ docker compose up -d --force-recreate --wait armazenamento servico
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Recreate 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Recreated 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Recreate 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Recreated 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Starting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Started 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Waiting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Healthy 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Starting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Started 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Waiting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Waiting 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1 Healthy 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1 Healthy 
+CODIGO_SAIDA=0
+$ docker compose images --format json
+[{"ID":"sha256:d1eeaea2bb17721e81ce0f93c230b41b4cc92989eaccf3ea47ee3e53b93a94ec","ContainerName":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento-1","Repository":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-armazenamento","Tag":"latest","Platform":"linux/amd64","Size":330637215,"Created":"2026-11-25T13:21:18.672035342-03:00","LastTagTime":"2026-11-25T16:59:32.13055568Z"},{"ID":"sha256:8f34717c57eefcca21e4c18de1ae80df137ceb7a3bf918308ae7463806a46af3","ContainerName":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico-1","Repository":"trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-servico","Tag":"latest","Platform":"linux/amd64","Size":330638038,"Created":"2026-11-25T14:00:07.497686847-03:00","LastTagTime":"2026-11-25T17:00:08.069960556Z"}]
+
+CODIGO_SAIDA=0
+$ docker compose run --rm --no-deps -e MODO=dividido -e MITIGACAO=nao -e TOTAL_ITENS=1500 -e CONCORRENCIA=64 -e TAMANHO_LOTE=16 gerador
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-gerador-run-6af2afc3e60e Creating 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-gerador-run-6af2afc3e60e Created 
+CONFIGURACAO_SERVIDOR: MODO=dividido | MITIGACAO=nao | MAX_SIMULTANEOS=16
+=== RESULTADO DO TESTE ===
+TOTAL_ITENS=1500 | CONCORRENCIA=64 | MITIGACAO=nao
+MODO=dividido | TAMANHO_LOTE=16 | MAX_SIMULTANEOS=16
+TEMPO_TOTAL_S=0.5153
+SUCESSOS=1500 | FALHAS=0 | TAXA_ERRO_PCT=0.00%
+VAZAO_ITENS_S=2911.00
+LATENCIA_P95_MS=32.13
+GRAVACOES=1500 | LEITURAS=1500 | TRANSICOES=4500
+CUSTO_ESTIMADO_10K=0.8569
+CODIGO_SAIDA=0

@@ -1,0 +1,11 @@
+VALIDACAO NEGATIVA: o servidor está sem mitigação; gerador solicita sim. Deve rejeitar antes da carga.
+$ docker compose run --rm --no-deps -e MODO=dividido -e MITIGACAO=sim -e TOTAL_ITENS=3 -e CONCORRENCIA=64 -e TAMANHO_LOTE=16 gerador
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-gerador-run-e76aab4900b7 Creating 
+ Container trabalho-de-containers-e-nuvem-laudo-de-incidente-reproduzido-gerador-run-e76aab4900b7 Created 
+CONFIGURACAO_SERVIDOR: MODO=dividido | MITIGACAO=nao | MAX_SIMULTANEOS=16
+Unhandled exception. System.InvalidOperationException: Cenário divergente: gerador MODO=dividido, MITIGACAO=sim; servidor MODO=dividido, MITIGACAO=nao. Recrie servico com o ambiente correto antes de medir.
+   at Program.<Main>$(String[] args) in /src/out/Program.cs:line 33
+   at Program.<Main>(String[] args)
+
+CODIGO_SAIDA=139
+VALIDACAO=APROVADA: divergência rejeitada antes da medição.

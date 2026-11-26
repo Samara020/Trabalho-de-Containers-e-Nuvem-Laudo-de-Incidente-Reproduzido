@@ -20,6 +20,13 @@ string AnalisarItem(byte[] conteudo)
     return Convert.ToHexString(resumo)[..12].ToLowerInvariant();
 }
 
+app.MapGet("/health", () =>
+{
+    return Results.Ok("ok");
+});
+
+app.MapGet("/configuracao", () => Results.Json(new { modo, mitigacao, maxSimultaneos }));
+
 async Task<string> ProcessarUmAsync(string id, byte[] conteudo)
 {
     if (string.Equals(modo, "dividido", StringComparison.OrdinalIgnoreCase))
@@ -57,28 +64,65 @@ app.MapPost("/analisar", async (HttpRequest req) =>
 
 app.MapPost("/analisar_lote", async (HttpRequest req) =>
 {
-    var itens = await JsonSerializer.DeserializeAsync<List<ItemLote>>(req.Body) ?? new List<ItemLote>();
+    var itensJson = await new StreamReader(req.Body).ReadToEndAsync();
+    var doc = JsonDocument.Parse(itensJson);
+    var root = doc.RootElement;
     var processados = 0;
 
-    if (string.Equals(mitigacao, "sim", StringComparison.OrdinalIgnoreCase))
+    if (string.Equals(mitigacao, "sim", StringComparison.OrdinalIgnoreCase) && string.Equals(modo, "dividido", StringComparison.OrdinalIgnoreCase))
     {
         await semaforo.WaitAsync();
         try
         {
-            foreach (var item in itens)
+            // Enviar lote inteiro em uma única chamada POST /lote
+            var loteContent = new StringContent(itensJson, System.Text.Encoding.UTF8, "application/json");
+            var respLote = await http.PostAsync($"http://armazenamento:8001/lote", loteContent);
+            respLote.EnsureSuccessStatusCode();
+
+            // Buscar todos os resultados em uma única chamada POST /lote_ler
+            var idsArray = new List<string>();
+            foreach (var el in root.EnumerateArray())
             {
-                await ProcessarUmAsync(item.id, Convert.FromBase64String(item.dados));
-                processados++;
+                if (el.TryGetProperty("id", out var idProp))
+                {
+                    idsArray.Add(idProp.GetString()!);
+                }
+            }
+
+            var lerContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(idsArray), System.Text.Encoding.UTF8, "application/json");
+            var respLer = await http.PostAsync($"http://armazenamento:8001/lote_ler", lerContent);
+            respLer.EnsureSuccessStatusCode();
+            var lerJson = await respLer.Content.ReadAsStringAsync();
+            using var lerDoc = JsonDocument.Parse(lerJson);
+            if (lerDoc.RootElement.TryGetProperty("itens", out var itensElem))
+            {
+                foreach (var item in itensElem.EnumerateArray())
+                {
+                    var b64 = item.GetString();
+                    if (b64 != null)
+                    {
+                        _ = AnalisarItem(Convert.FromBase64String(b64));
+                        processados++;
+                    }
+                }
             }
         }
         finally { semaforo.Release(); }
     }
     else
     {
-        foreach (var item in itens)
+        foreach (var el in root.EnumerateArray())
         {
-            await ProcessarUmAsync(item.id, Convert.FromBase64String(item.dados));
-            processados++;
+            if (el.TryGetProperty("id", out var idProp) && el.TryGetProperty("dados", out var dadosProp))
+            {
+                var id = idProp.GetString();
+                var base64 = dadosProp.GetString();
+                if (id != null && base64 != null)
+                {
+                    await ProcessarUmAsync(id, Convert.FromBase64String(base64));
+                    processados++;
+                }
+            }
         }
     }
 
@@ -86,5 +130,3 @@ app.MapPost("/analisar_lote", async (HttpRequest req) =>
 });
 
 app.Run();
-
-record ItemLote(string id, string dados);
